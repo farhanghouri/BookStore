@@ -1,14 +1,17 @@
 
 class BookStore
 
-	def self.ready()
-		puts 'ready!'
+	def self.instance
+	    return @@instance
 	end
 
 	def initialize()
-	@books = {}
+		@books = {}
+		@books_rating = {}
 	end
 	
+	@@instance = BookStore.new
+
 	def add(title,data)
 		if @books[title].nil?
 			@books[title] = data 
@@ -41,6 +44,9 @@ class BookStore
 		@books.each{
 			|a,b| puts "title: #{a} data: #{b}"
 		}
+		@books_rating.each{
+			|a,b| puts "title: #{a} rating: #{b}"
+		}
 	end
 	
 	def saveToFile(title)
@@ -53,6 +59,10 @@ class BookStore
 			puts "book does not exist"
 		end
 	end
+
+	def bookRating(title,rating)
+		@books_rating[title] = rating
+	end
 	
 	def search(title)
 		unless @books[title].nil?
@@ -61,11 +71,14 @@ class BookStore
 			puts "book does not exist"
 		end
 	end
+
+	private_class_method :new
+
 end
 
-obj = BookStore.new()
+obj = BookStore.instance()
 
-puts "ADD 1\nUPDATE 2\nDELETE 3\nDISPLAY 4\nSave 5\nSearch 6	"
+puts "ADD 1\nUPDATE 2\nDELETE 3\nDISPLAY 4\nSave 5\nSearch 6\nRating 7	"
 
 loop do 
 	print "enter: "
@@ -99,7 +112,12 @@ loop do
 		print "title: "
 		title = gets.chomp					
 		obj.search(title)
-
+	when 7
+		print "title: "
+		title = gets.chomp
+		print "rating: "
+	 	rating = gets.chomp
+	 	obj.bookRating(title,rating)
 	else
 	break	
 	end
