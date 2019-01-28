@@ -1,72 +1,54 @@
 
 class BookStore
-  def self.instance
-    @instance
+  class << self
+    attr_reader :instance
   end
 
   def initialize
-    @books = {}
     @books_rating = {}
   end
 
   @instance = BookStore.new
 
-  def add(title, data)
-    if @books[title].nil?
-      @books[title] = data
+  public def add(title, rating)
+    if @books_rating[title].nil?
+      @books_rating[title] = rating
     else
-      puts 'book already exist.'
+      -1
     end
-  end
+    end
 
-  def update(title, data)
-    if @books[title].nil?
-      puts 'book does not exist'
+  def update(title, rating)
+    if @books_rating[title].nil?
+      -1
     else
-      @books[title] = data
-      puts "book #{title} has been updated!"
+      @books_rating[title] = rating
     end
   end
 
   def delete(title)
-    if @books[title].nil?
-      puts 'book does not exist'
-    else
-      @books.delete(title)
-      File.delete(title) if File.exist?(title)
-      puts "book #{title} has been deleted!"
-    end
+    @books_rating.delete(title) unless @books_rating[title].nil?
   end
 
   def display
-    @books.each do |a, b|
-      puts "title: #{a} data: #{b}"
-    end
     @books_rating.each do |a, b|
       puts "title: #{a} rating: #{b}"
     end
   end
 
-  def save_to_file(title)
-    if @books[title].nil?
-      puts 'book does not exist'
-    else
-      File.open(title, 'w') do |line|
-        line.puts @books[title]
-      end
-      puts "book #{title} has been saved!"
-    end
+  def save_to_file
+    File.open('test.marshal', 'w') { |to_file| Marshal.dump(@books_rating, to_file) }
   end
 
-  def book_rating(title, rating)
-    @books_rating[title] = rating
+  def read_from_file
+    puts File.open('test.marshal', 'r') { |from_file| Marshal.load(from_file) }
   end
 
   def search(title)
-    if @books[title].nil?
-      puts 'book does not exist'
+    if @books_rating[title].nil?
+      -1
     else
-      puts 'book exist'
+      1
     end
   end
 
@@ -75,7 +57,7 @@ end
 
 obj = BookStore.instance
 
-puts "ADD 1\nUPDATE 2\nDELETE 3\nDISPLAY 4\nSave 5\nSearch 6\nRating 7	"
+puts "ADD 1\nUPDATE 2\nDELETE 3\nDISPLAY 4\nSave to File 5\nSearch 6\nRead From File 7	"
 
 loop do
   print 'enter: '
@@ -84,16 +66,15 @@ loop do
   when 1
     print 'title: '
     title = gets.chomp
-    print 'data: '
+    print 'rating: '
     data = gets.chomp
-    obj.add(title, data)
+    puts 'book already exist.' if obj.add(title, data) == -1
   when 2
     print 'title: '
     title = gets.chomp
-    print 'data: '
+    print 'rating: '
     data = gets.chomp
-    obj.update(title, data)
-
+    puts 'book does not exist' if obj.update(title, data) == -1
   when 3
     print 'title: '
     title = gets.chomp
@@ -102,19 +83,17 @@ loop do
     obj.display
 
   when 5
-    print 'title: '
-    title = gets.chomp
-    obj.save_to_file(title)
+    obj.save_to_file
   when 6
     print 'title: '
     title = gets.chomp
-    obj.search(title)
+    if obj.search(title) == -1
+      puts 'book does not exist'
+    else
+      puts 'book exist'
+    end
   when 7
-    print 'title: '
-    title = gets.chomp
-    print 'rating: '
-    rating = gets.chomp
-    obj.book_rating(title, rating)
+    obj.read_from_file
   else
     break
   end
