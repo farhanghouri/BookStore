@@ -1,14 +1,15 @@
 
 class BookStore
-  class << self
-    attr_reader :instance
+  
+  def self.instance
+    @@instance
   end
 
   def initialize
     @books_rating = {}
   end
 
-  @instance = BookStore.new
+  @@instance = BookStore.new
 
   public def add(title, rating)
     if @books_rating[title].nil?
